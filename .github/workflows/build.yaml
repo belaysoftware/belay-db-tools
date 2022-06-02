@@ -1,0 +1,35 @@
+name: Build
+
+# build on pushes to main
+on:
+  push:
+    branches: [main]
+
+# base image name, difficult to compute due to docker lowercase requirement
+env:
+  IMAGE_NAME: ghcr.io/belaysoftware/belay-db-backup
+  TAG: "latest"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Docker image
+        id: build
+        run: |
+          docker build \
+            --tag ${{env.IMAGE_NAME}}:${{github.sha}} \
+            --tag ${{env.IMAGE_NAME}}:${{env.TAG}} \
+            --file Dockerfile \
+            .
+      - name: Push Docker image
+        if: github.event_name == 'push'
+        run: docker push -a ${{env.IMAGE_NAME}}
