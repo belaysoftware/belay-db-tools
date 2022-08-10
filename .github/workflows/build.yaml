@@ -7,7 +7,7 @@ on:
 
 # base image name, difficult to compute due to docker lowercase requirement
 env:
-  IMAGE_NAME: ghcr.io/belaysoftware/belay-db-backup
+  IMAGE_NAME: ghcr.io/belaysoftware/belay-db-tools
   TAG: "latest"
 
 jobs:
