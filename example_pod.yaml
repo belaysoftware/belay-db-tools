@@ -2,35 +2,33 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: db-utils
-  spec:
-    restartPolicy: Never
-    imagePullSecrets:
-      - name: ghcr
-    containers:
-      - name: db-utils
-        image: ghcr.io/belaysoftware/belay-db-tools
-        imagePullPolicy: IfNotPresent
-        env:
-          - name: TASK
-            value: backup
-          - name: AWS_S3_REGION_NAME
-            valueFrom:
-              secretKeyRef:
-                name: db-bucket
-                key: region_name
-          - name: AWS_STORAGE_BUCKET_NAME
-            valueFrom:
-              secretKeyRef:
-                name: db-bucket
-                key: bucket_name
-          - name: AWS_S3_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: db-bucket
-                key: access_key
-          - name: AWS_S3_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: db-bucket
-                key: secret_key
-        command: ["tail", "-f", "/dev/null"]
+spec:
+  restartPolicy: Never
+  containers:
+    - name: db-utils
+      image: ghcr.io/belaysoftware/belay-db-tools
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: TASK
+          value: backup
+        - name: AWS_S3_REGION_NAME
+          valueFrom:
+            secretKeyRef:
+              name: db-bucket
+              key: region_name
+        - name: AWS_STORAGE_BUCKET_NAME
+          valueFrom:
+            secretKeyRef:
+              name: db-bucket
+              key: bucket_name
+        - name: AWS_S3_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: db-bucket
+              key: access_key
+        - name: AWS_S3_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: db-bucket
+              key: secret_key
+      command: ["tail", "-f", "/dev/null"]
