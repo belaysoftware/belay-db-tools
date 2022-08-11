@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -euo pipefail
 
 TASK=${TASK:-backup}
@@ -21,22 +21,22 @@ while getopts "br:d:" option; do
    esac
 done
 
-PGHOST=${DB_SERVICE_HOST:-db}
-PGPORT=${DB_SERVICE_PORT:-5432}
-PGDATABASE=$DB_NAME
-PGUSER=${DB_USERNAME:-$DB_NAME}
-PGPASSWORD=${DB_PASSWORD:-$DB_USERNAME}
+export PGHOST=${DB_SERVICE_HOST:-db}
+export PGPORT=${DB_SERVICE_PORT:-5432}
+export PGDATABASE=$DB_NAME
+export PGUSER=${DB_USERNAME:-$DB_NAME}
+export PGPASSWORD=${DB_PASSWORD:-$PGUSER}
 
 backup() {
     D=`date +%Y-%m-%d`
     FN=$DB_NAME-$D.dump
     pg_dump --format=c > "$FN"
-    s3cmd --access-key=$AWS_S3_ACCESS_KEY_ID --secret-key=$AWS_S3_SECRET_ACCESS_KEY put "$FN" s3://$AWS_STORAGE_BUCKET_NAME/
+    s3cmd --access_key=$AWS_S3_ACCESS_KEY_ID --secret_key=$AWS_S3_SECRET_ACCESS_KEY put "$FN" s3://$AWS_STORAGE_BUCKET_NAME/
 }
 
 restore() {
-    s3cmd --access-key=$AWS_S3_ACCESS_KEY_ID --secret-key=$AWS_S3_SECRET_ACCESS_KEY get s3://$AWS_STORAGE_BUCKET_NAME/$FN
-    pg_restore --clean --create "$FN"
+    s3cmd --access_key=$AWS_S3_ACCESS_KEY_ID --secret_key=$AWS_S3_SECRET_ACCESS_KEY --force get s3://$AWS_STORAGE_BUCKET_NAME/$FN
+    pg_restore --create --clean --no-owner --no-privileges -vvv -d $PGDATABASE "$FN"
 }
 
 case $TASK in
