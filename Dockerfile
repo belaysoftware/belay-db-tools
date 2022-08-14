@@ -5,4 +5,4 @@ RUN apk add s3cmd postgresql14-client --repository=http://dl-cdn.alpinelinux.org
 WORKDIR /root
 ADD run.sh .s3cfg /root/
 
-ENTRYPOINT [ "run.sh" ]`
+ENTRYPOINT [ "/root/run.sh" ]`
