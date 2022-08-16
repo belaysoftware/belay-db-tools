@@ -23,6 +23,7 @@ done
 
 export PGHOST=${DB_SERVICE_HOST:-db}
 export PGPORT=${DB_SERVICE_PORT:-5432}
+export MYSQL_PORT=${DB_SERVICE_PORT:-3306}
 export PGDATABASE=$DB_NAME
 export PGUSER=${DB_USERNAME:-$DB_NAME}
 export PGPASSWORD=${DB_PASSWORD:-$PGUSER}
@@ -30,7 +31,8 @@ export PGPASSWORD=${DB_PASSWORD:-$PGUSER}
 backup() {
     D=`date +%Y-%m-%d`
     FN=$DB_NAME-$D.dump
-    pg_dump --format=c > "$FN"
+    echo "Backing up pg://$PGHOST/$DB_NAME to $FN"
+    pg_dump --format=c > "$FN" || mysqldump --host=$PGHOST --port=$MYSQL_PORT --user=$PGUSER --password=$PGPASSWORD $DB_NAME > "$FN"
     s3cmd --access_key=$AWS_S3_ACCESS_KEY_ID --secret_key=$AWS_S3_SECRET_ACCESS_KEY put "$FN" s3://$AWS_STORAGE_BUCKET_NAME/
 }
 
