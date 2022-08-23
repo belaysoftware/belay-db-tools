@@ -31,4 +31,9 @@ spec:
             secretKeyRef:
               name: db-bucket
               key: secret_key
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: name
       command: ["tail", "-f", "/dev/null"]

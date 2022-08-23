@@ -3,7 +3,7 @@ set -euo pipefail
 
 TASK=${TASK:-backup}
 
-while getopts "br:d:" option; do
+while getopts "br:d:m" option; do
     case $option in
         b)
             TASK=backup
@@ -14,6 +14,9 @@ while getopts "br:d:" option; do
             ;;
         d)
             DB_NAME=$OPTARG
+            ;;
+        m)
+            TASK=mysql
             ;;
         \?) # Invalid option
             echo "Error: Invalid option"
@@ -38,7 +41,7 @@ backup() {
 
 restore() {
     s3cmd --access_key=$AWS_S3_ACCESS_KEY_ID --secret_key=$AWS_S3_SECRET_ACCESS_KEY --force get s3://$AWS_STORAGE_BUCKET_NAME/$FN
-    pg_restore --create --clean --no-owner --no-privileges -vvv -d $PGDATABASE "$FN"
+    pg_restore --create --clean --no-owner --no-privileges -vvv -d $PGDATABASE "$FN" || mysql --host=$PGHOST --port=$MYSQL_PORT --user=$PGUSER --password=$PGPASSWORD $DB_NAME < "$FN"
 }
 
 case $TASK in
@@ -48,8 +51,10 @@ case $TASK in
     restore)
         restore
         ;;
+    mysql)
+        mysql --host=$PGHOST --port=$MYSQL_PORT --user=$PGUSER --password=$PGPASSWORD $DB_NAME
+        ;;
     *)
         echo "Usage: $0 {-b|-r file_name} [-d db_name]"
         exit 1
         ;;
-esac
