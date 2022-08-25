@@ -58,3 +58,4 @@ case $TASK in
         echo "Usage: $0 {-b|-r file_name} [-d db_name]"
         exit 1
         ;;
+esac
