@@ -42,17 +42,17 @@ backup() {
     D=`date +%Y-%m-%d`
     FN=$DB_NAME-$D.dump
     echo "Backing up pg://$PGHOST/$DB_NAME to $FN"
-    pg_dump --format=c > "$FN" || mysqldump --host=$PGHOST --port=$MYSQL_PORT --user=$PGUSER --password=$PGPASSWORD $DB_NAME > "$FN"
+    pg_dump --format=c > "$FN" || mysqldump --verbose --host=$PGHOST --port=$MYSQL_PORT --user=$PGUSER --password=$PGPASSWORD $DB_NAME > "$FN"
     s3cmd --access_key=$AWS_S3_ACCESS_KEY_ID --secret_key=$AWS_S3_SECRET_ACCESS_KEY put "$FN" s3://$AWS_STORAGE_BUCKET_NAME/
 }
 
 restore() {
     s3cmd --access_key=$AWS_S3_ACCESS_KEY_ID --secret_key=$AWS_S3_SECRET_ACCESS_KEY --force get s3://$AWS_STORAGE_BUCKET_NAME/$FN
-    pg_restore --clean --no-owner --no-privileges -vvv -d $PGDATABASE "$FN" || mysql --host=$PGHOST --port=$MYSQL_PORT --user=$PGUSER --password=$PGPASSWORD $DB_NAME < "$FN"
+    pg_restore --clean --no-owner --no-privileges -vvv -d $PGDATABASE "$FN" || mysql --verbose --host=$PGHOST --port=$MYSQL_PORT --user=$PGUSER --password=$PGPASSWORD $DB_NAME < "$FN"
 }
 
 provision_mysql() {
-    mysql --host=$PGHOST --port=$MYSQL_PORT --user=$ROOT_USER --password=$ROOT_PASSWORD <<- EOF
+    mysql --verbose --host=$PGHOST --port=$MYSQL_PORT --user=$ROOT_USER --password=$ROOT_PASSWORD <<- EOF
     create database if not exists \`$PGDATABASE\`;
     create user if not exists \`$PGUSER\` identified by '$PGPASSWORD';
     grant all on \`$PGDATABASE\`.* to \`$PGUSER\`;
