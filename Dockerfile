@@ -5,4 +5,4 @@ RUN apk add s3cmd postgresql18-client mysql-client --repository=http://dl-cdn.al
 WORKDIR /root
 ADD run.sh .s3cfg /root/
 
-ENTRYPOINT [ "/root/run.sh" ]`
+ENTRYPOINT [ "/root/run.sh" ]
